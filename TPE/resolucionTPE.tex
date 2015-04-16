@@ -31,15 +31,23 @@
 \input{tipos/flor.tex}
 
 \begin{problema}{nuevaF}{v : \ent, cP : \ent, hs : [Habilidad]}{Flor}
+\requiere{sinRepetidos(hs)}
+\requiere[lasHabilidadesDeterminanLaVidayElGolpe]{v == 100 \textsf{div} (\longitud{hs} + 1) \land cP == \IfThenElse{\en{Atacar, hs}}{12 \textbf{div} \longitud{hs}}{0}}
+\asegura{v == vida(res)}
+\asegura{cP == cuantoPega(res)}
+\asegura{mismos(hs, habilidades(res))}
 \end{problema}
 
 \begin{problema}{vidaF}{f: Flor}{\ent}
+\asegura{res == vida(f)}
 \end{problema}
 
 \begin{problema}{cuantoPegaF}{f: Flor}{\ent}
+\asegura{res == cuantoPega(f)}
 \end{problema}
 
 \begin{problema}{habilidadesF}{f: Flor}{[Habilidad]}
+\asegura{mismos(res, habilidades(f))}
 \end{problema}
 
 
