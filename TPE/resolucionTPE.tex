@@ -32,7 +32,7 @@
 
 \begin{problema}{nuevaF}{v : \ent, cP : \ent, hs : [Habilidad]}{Flor}
 \requiere{sinRepetidos(hs)}
-\requiere[lasHabilidadesDeterminanLaVidayElGolpe]{v == 100 \textsf{div} (\longitud{hs} + 1) \land cP == \IfThenElse{\en{Atacar, hs}}{12 \textbf{div} \longitud{hs}}{0}}
+\requiere{v == 100 \textsf{div} (\longitud{hs} + 1) \land cP == \IfThenElse{\en{Atacar, hs}}{12 \textbf{div} \longitud{hs}}{0}}
 \asegura{v == vida(res)}
 \asegura{cP == cuantoPega(res)}
 \asegura{mismos(hs, habilidades(res))}
@@ -56,15 +56,23 @@
 \input{tipos/vampiro.tex}
 
 \begin{problema}{nuevoV}{cv : ClaseVampiro, v : \ent, cP : \ent}{Vampiro}
+\requiere[vidaEnRango]{v \geq 0 \land v \leq 100}
+\requiere[pegaEnSerio]{cP > 0}
+\asegura{clase(res) == cV}
+\asegura{vida(res) == v}
+\asegura{cuantoPega(res) == cP}
 \end{problema}
 
 \begin{problema}{claseVampiroV}{v : Vampiro}{ClaseVampiro}
+\asegura{res == clase(v)}
 \end{problema}
 
 \begin{problema}{vidaV}{v : Vampiro}{\ent}
+\asegura{res == vida(v)}
 \end{problema}
 
 \begin{problema}{cuantoPegaV}{v : Vampiro}{\ent}
+\asegura{res == cuantoPega(v)}
 \end{problema}
 
 % problemas igual a Flor
