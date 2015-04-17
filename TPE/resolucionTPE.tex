@@ -135,6 +135,11 @@
 \end{problema}
 
 \begin{problema}{agregarNivelJ}{j: Juego, n: Nivel, i: \ent}{}
+\modifica{j}
+\requiere{0 \leq i \land i \leq \longitud{niveles(j)}}
+\requiere[nivelValido]{turno(n) == 0 \land \longitud{flores(n)} == 0 \land \longitud{vampiros(n)} == 0}
+\asegura{indice(niveles(j), i) == n}
+\asegura{niveles(j) \rangoca{0}{i} \masmas niveles(j) \rangoaa{i}{\longitud{niveles(j)}} == niveles(pre(j))}
 \end{problema}
 
 \begin{problema}{estosSalenFacil}{j: Juego}{[Nivel]}
