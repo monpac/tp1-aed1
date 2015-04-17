@@ -123,12 +123,15 @@
 \input{tipos/juego.tex}
 
 \begin{problema}{floresJ}{j: Juego}{[Flor]}
+\asegura{mismos(result, flores(j))}
 \end{problema}
 
 \begin{problema}{vampirosJ}{j: Juego}{[Vampiro]}
+\asegura{mismos(result, vampiros(j))}
 \end{problema}
 
 \begin{problema}{nivelesJ}{j: Juego}{[Nivel]}
+\asegura{mismos(result, niveles(j))}
 \end{problema}
 
 \begin{problema}{agregarNivelJ}{j: Juego, n: Nivel, i: \ent}{}
