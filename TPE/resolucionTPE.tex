@@ -78,6 +78,13 @@
 \input{tipos/nivel.tex}
 
 \begin{problema}{nuevoN}{an : \ent, al : \ent, s : \ent, spaw : [(Vampiro, \ent, \ent)]}{Nivel}
+\requiere[unBuenSpawn]{(\forall t \selec spaw) 1 \leq sgd(t) \leq al \land trd(t) \geq 0}
+\requiere[entradasValidas]{an > 0 \land al > 0 \land s \geq 0}
+\asegura[vacio]{flores(res)==[] \land vampiros(res) == []}
+\asegura[dimensiones]{ancho(res) == an \land alto(res) == al}
+\asegura{turno(res) == 0}
+\asegura{soles(res) == s}
+\asegura{mismos(spawning(res), spaw)}
 \end{problema}
 
 \begin{problema}{anchoN}{n : Nivel}{\ent}
