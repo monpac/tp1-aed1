@@ -163,4 +163,5 @@
 \aux{vidaFloresOk}{fs: [(Flor, Posicion, Vida)]}{\bool}{(\forall f \selec fs) trd(f) > 0 \land trd(f) \leq vida(prm(f))}
 \aux{vidaVampirosOk}{fs: [(Vampiro, Posicion, Vida)]}{\bool}{(\forall f \selec fs) trd(f) > 0 \land trd(f) \leq vida(prm(f))}
 \aux{floresIguales}{x, y}{\bool}{mismos(habilidades(x), habilidades(y))}
+\aux{peso}{sp: (Vampiro, \ent, \ent), n: Nivel}{\ent}{trd(sp) * alto(n) + sgd(sp)}
 \end{document}
