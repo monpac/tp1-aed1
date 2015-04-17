@@ -1,0 +1,82 @@
+V' - para todo
+E' - existe
+_j - sub j
+
+
+10)
+invariante posisionesValidas : (V' f <- flores(n)) (1 <= prm(sgd(f)) <= |ancho(n)| && 1 <= sgd(sgd(f)) <= |alto(n))
+							&& (V' v <- vampiros(n)) (1 <= prm(sgd(v)) <= |ancho(n)| && 1 <= sgd(sgd(v)) <= |alto(n));
+
+11)							
+invariante spawningOrdenado : (V' i,j <- [0..|spawning(n)|), i<j) peso(spawning(n)_i, n) < peso(spawning(n)_j, n);
+
+aux peso(sp:(Vampiro, Z, Z), n:Nivel) : Z = trd(sp) * alto(n) + sgd(sp);
+
+12)
+problema nuevoN (an:Z, al:Z, s:Z, spaw:[(Vampiro, Z, Z)]) = result:Nivel {
+	requiere unBuenSpawn : (V' t <- spawning(n)) 1 <= sgd(t) <= alto(t) && trd(t) >= 0;
+	requiere entradasValidas : an > 0 && al > 0 && s >= 0;
+
+	asegura vacio : flores(result) == [] && vampiros(result) == [];
+	asegura dimensiones : ancho(result) == an && alto(result) == al;
+	asegura : turno(result) == 0;
+	asegura : soles(result) == s;
+	asegura : mismos(spawning(result), spaw);
+}
+
+13)
+problema anchoN(n:Nivel) = result:Z {
+	asegura : result == ancho(n);
+}
+
+14)
+problema altoN(n:Nivel) = result:Z {
+	asegura : result == alto(n);
+}
+
+15)
+problema turnoN(n:Nivel) = result:Z {
+	asegura : result == turno(n);
+}
+
+16)
+problema solesN(n:Nivel) = result:Z {
+	asegura : result == soles(n);
+}
+
+17)
+problema floresN(n:Nivel) = result:Z {
+	asegura : mismos(result, flores(n));
+}
+
+
+- - - 
+
+33)
+
+// La trampa que parece tener es que si un vampiro tiene 1 de vida la division entera
+//   daria 0 y no cumpliria el invariante del nivel
+// Por ahi me falto aseugrar algo en la lista de vampiros, no estoy seguro
+
+problema altoCheat(j:Juego, i:Z) {
+	requiere : 0 <= i < |niveles(j)|;
+
+	modifica : j;
+
+	asegura : flores(pre(j)) == flores(j);
+	asegura : vampiros(pre(j)) == vampiros(j);
+	asegura : (V' ni <- [0..niveles(j)), ni != i) niveles(pre(j))_ni == niveles(j)_ni;
+	asegura : ancho(niveles(pre(j))_i) == ancho(niveles(j)_i);
+	asegura : alto(niveles(pre(j))_i) == alto(niveles(j)_i);
+	asegura : turno(niveles(pre(j))_i) == turno(niveles(j)_i);
+	asegura : soles(niveles(pre(j))_i) == soles(niveles(j)_i);
+	asegura : flores(niveles(pre(j))_i) == flores(niveles(j)_i);
+	asegura : spawning(niveles(pre(j))_i) == spawning(niveles(j)_i);
+	asegura Si no muere divide su vida : 
+			(V' vi <- [0..|vampiros(niveles(pre(j))_i)|), trd(vampiros(niveles(pre(j))_i)_vi) > 1)
+			(E' v <- vampiros(niveles(j)_i)) prm(v) == prm(vampiros(niveles(pre(j))_i)_vi)
+			  								&& sgd(v) == sgd(vampiros(niveles(pre(j))_i)_vi)
+			  								&& trd(v) == trd(vampiros(niveles(pre(j))_i)_vi)/2;
+	asegura Cantidad de vampiros sobrevivientes : 
+			|vampiros(niveles(j)_i)| == |[v | v <- vampiros(niveles(pre(j))_i), trd(v) > 1]|;
+}
