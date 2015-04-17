@@ -81,19 +81,24 @@
 \end{problema}
 
 \begin{problema}{anchoN}{n : Nivel}{\ent}
+\asegura{res == ancho(n)}
 \end{problema}
 
 \begin{problema}{altoN}{n : Nivel}{\ent}
+\asegura{res == alto(n)}
 \end{problema}
 
 
 \begin{problema}{turnoN}{n : Nivel}{\ent}
+\asegura{res == turno(n)}
 \end{problema}
 
 \begin{problema}{solesN}{n : Nivel}{\ent}
+\asegura{res == soles(n)}
 \end{problema}
 
 \begin{problema}{floresN}{n : Nivel}{[(Flor, Posicion, Vida)]}
+\asegura{mismos(res, flores(n))}
 \end{problema}
 
 \begin{problema}{vampirosN}{n : Nivel}{[(Vampiro, Posicion, Vida)]}
