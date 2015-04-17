@@ -109,23 +109,33 @@
 \end{problema}
 
 \begin{problema}{vampirosN}{n : Nivel}{[(Vampiro, Posicion, Vida)]}
+\asegura{mismos(res, vampiros(n))}
 \end{problema}
 
 \begin{problema}{spawningN}{n : Nivel}{[(Vampiro, \ent, \ent)]}
+\asegura{mismos(res, spawning(n))}
 \end{problema}
 
 \begin{problema}{comprarSoles}{n: Nivel, s : \ent}{}
+	\modifica n
+	\asegura{soles(n) == soles(pre(n)) + s}
 \end{problema}
 
 \begin{problema}{obsesivoCompusilvo}{n: Nivel}{\bool}
 \end{problema}
 
 \begin{problema}{agregarFlor}{n: Nivel, f : Flor, p : Posicion}{}
+	\requiere {soles(pre(n)) > pot(2,|habilidades(f)|)}
+	\modifica n
+	\asegura {flores(n) == flores(pre(n)) ++ (f,p,vida(f))}
 \end{problema}
 
-\noindent\aux{terminado}{n: Nivel}{\bool}{}
+\noindent\aux{terminado}{n: Nivel}{\bool}{\IfThenElse{(!vNoCero(vampiros(n)) \lor vampiros(n) == 0)}{true}{false}}
 
 \begin{problema}{pasarTurno}{n: Nivel}{}
+	\requiere {terminado(pre(n)) == false}
+	\modifica n
+	\asegura {turno(n) == turno(pre(n)) + 1}
 \end{problema}
 
 
@@ -148,22 +158,38 @@
 
 \begin{problema}{agregarNivelJ}{j: Juego, n: Nivel, i: \ent}{}
 \modifica{j}
-\requiere{0 \leq i \land i \leq \longitud{niveles(j)}}
+\requiere{0 \leq i \land i \leq \longitud{niveles(pre(j))}}
 \requiere[nivelValido]{turno(n) == 0 \land \longitud{flores(n)} == 0 \land \longitud{vampiros(n)} == 0}
 \asegura{indice(niveles(j), i) == n}
 \asegura{niveles(j) \rangoca{0}{i} \masmas niveles(j) \rangoaa{i}{\longitud{niveles(j)}} == niveles(pre(j))}
 \end{problema}
 
 \begin{problema}{estosSalenFacil}{j: Juego}{[Nivel]}
+	\requiere {\longitud{niveles(j)} > 0}
+	\asegura {mismos(res, maxPlantas(maxSoles(niveles(res))))}
 \end{problema}
 
 \begin{problema}{jugarNivel}{j: Juego, n: Nivel, i: \ent}{}
+	\requiere[altoOK]{alto(indice(i,niveles(pre(j))) == alto(n)}
+	\requiere[anchoOK]{alto(indice(i,niveles(pre(j))) == ancho(n)}
+	\requiere[turnoOK]{turno(indice(i,niveles(pre(j))) < turno(n)}
+	\requiere[spawnOk]{todos(spawnI, spawnI \selec spawning(indice(i,niveles(pre(j))))),todos(spawnN, spawnN \selec spawning(N), prm(spawnI) == prm(spawnN) \land sgd(spawnI) == sgd(spawnN) \land tcr(spawnI) == tcr(spawnN)}
+	\modifica j
+	\asegura{indice(i, niveles(j))==n}
+	\asegura{\longitud{niveles(j)} == \longitud{niveles(pre(j))}}
+	\asegura[losDemasNoCambian]{[indice(k,niveles(j)), k \selec [0..i)] ++ [indice(k,niveles(j)), k \selec (i..\longitud{niveles(j)})] == niveles(pre(j))}
+	
 \end{problema}
 
 \begin{problema}{altoCheat}{j: Juego, i: \ent}{}
+	\requiere[rangoOk]{0\leq i\leq \longitud{niveles(pre(j)}}		
+	\modifica j;
+	\asegura[mitadVida]{todos(truplaPreV, truplaPreV<-vampiros(indice(i,niveles(pre(j))))), todos(truplaV, truplaV<-vampiros(indice(i,niveles((j))))), tcr(truplaV) == tcr(truplaPreV)/2}
+	\asegura[nadaMasCambio]{todos(truplaPreV, truplaPreV \selec vampiros(indice(i,niveles(pre(j))))), todos(truplaV, truplaV \selec vampiros(indice(i,niveles((j))))), prm(truplaV) == prm(truplaPreV) \land sgd(truplaV) == sgd(truplaPreV)}
 \end{problema}
 
 \begin{problema}{muyDeExactas}{j: Juego}{\bool}
+	\asegura{sum(i, i \selec ganados(niveles(j))) == indice(\longitud{ganados(niveles(j))} - 1,ganados(niveles(j)))}
 \end{problema}
 
 \section{Auxiliares}
@@ -171,4 +197,10 @@
 \aux{vidaVampirosOk}{fs: [(Vampiro, Posicion, Vida)]}{\bool}{(\forall f \selec fs) trd(f) > 0 \land trd(f) \leq vida(prm(f))}
 \aux{floresIguales}{x, y}{\bool}{mismos(habilidades(x), habilidades(y))}
 \aux{peso}{sp: (Vampiro, \ent, \ent), n: Nivel}{\ent}{trd(sp) * alto(n) + sgd(sp)}
+\aux{vNoCero}{vmprs: [(Vampiro,Posicion,Vida)]}{\bool}{(\forall v \selec vmprs)\ sgd(sgd(v)) \neq 0}
+\aux{maxSoles}{ns: [Nivel]}{[Nivel]}{[nivel,nivel \selec ns, maxS(ns,soles(nivel))]}
+\aux{maxS}{ns: [Nivel],maximo}{Bool}{(\forall nivel \selec ns, soles(nivel) \leq maximo) nivel}
+\aux{maxFlores}{ns: [Nivel]}{[Nivel]}{[nivel,nivel \selec ns, maxP(ns,\longitud{flores(nivel)})]}
+\aux{maxP}{ns: [Nivel],maximo}{Bool}{(\forall nivel \selec ns, \longitud{flores(nivel) \leq maximo)})}
+\aux{ganados}{ns : [Nivel]}{[Nivel]}{[nivel, nivel\selec ns, \longitud{spawning(nivel)}==0 \land ] }
 \end{document}
