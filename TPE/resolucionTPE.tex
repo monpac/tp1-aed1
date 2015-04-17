@@ -122,6 +122,7 @@
 \end{problema}
 
 \begin{problema}{obsesivoCompusilvo}{n: Nivel}{\bool}
+	\asegura {res == (\forall i \selec enOrden(flores(n), n))\  Obscom(i)}
 \end{problema}
 
 \begin{problema}{agregarFlor}{n: Nivel, f : Flor, p : Posicion}{}
@@ -203,4 +204,6 @@
 \aux{maxFlores}{ns: [Nivel]}{[Nivel]}{[nivel,nivel \selec ns, maxP(ns,\longitud{flores(nivel)})]}
 \aux{maxP}{ns: [Nivel],maximo}{Bool}{(\forall nivel \selec ns, \longitud{flores(nivel) \leq maximo)})}
 \aux{ganados}{ns : [Nivel]}{[Nivel]}{[nivel, nivel\selec ns, \longitud{spawning(nivel)}==0 \land ] }
+\aux{obsCom}{x: [(Flores, Posicion, Vida)]}{\bool}{\IfThenElse{(\exists j \selec x, j \neq 0 \lor j \neq \longitud{x}-1)\ habilidadesF(prm(j)) == Atacar}{habilidadesF(prm(j-1)) \neq Atacar \land habilidadesF(prm(j+1)) \neq Atacar}{habilidadesF(prm(j-1)) == Atacar \land habilidadesF(prm(j+1)) == Atacar}}
+\aux{enOrden}{(flor: [(Flor,Posicion,Vida)], niv: Nivel)}{[(Flor,Posicion,Vida)]}{[prm(f),(posx,posy),trd(f)|,f \selec flor, posx \selec [0..ancho(niv)),posy \selec [0..alto(niv)]}
 \end{document}
