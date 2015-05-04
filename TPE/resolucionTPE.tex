@@ -105,7 +105,7 @@
 \end{problema}
 
 \begin{problema}{floresN}{n : Nivel}{[(Flor, Posicion, Vida)]}
-\asegura{mismos(res, flores(n))}
+\asegura{\longitud{res} == \longitud{flores(n)} \land \forall(fr \selec res)(\exists(fn \selec flores(n))	(floresIguales(prm(fr), prm(fn)) \land sgd(fr) == sgd(fn) \land trd(fr) == trd(fn)))}
 \end{problema}
 
 \begin{problema}{vampirosN}{n : Nivel}{[(Vampiro, Posicion, Vida)]}
@@ -117,8 +117,15 @@
 \end{problema}
 
 \begin{problema}{comprarSoles}{n: Nivel, s : \ent}{}
+	\requiere {s \geq 0}
 	\modifica n
-	\asegura{soles(n) == soles(pre(n)) + s}
+	\asegura {soles(n) == soles(pre(n)) + s}
+	\asegura {ancho(n) == ancho(pre(n))}
+	\asegura {alto(n) == alto(pre(n))}
+	\asegura {turno(n) == turno(pre(n))}
+	\asegura {flores(n) == flores(pre(n))}
+	\asegura {vampiros(n) == vampiros(pre(n))}
+	\asegura {spawning(n) == spawning(pre(n))}
 \end{problema}
 
 \begin{problema}{obsesivoCompusilvo}{n: Nivel}{\bool}
@@ -126,7 +133,9 @@
 \end{problema}
 
 \begin{problema}{agregarFlor}{n: Nivel, f : Flor, p : Posicion}{}
-	\requiere {soles(pre(n)) > pot(2,|habilidades(f)|)}
+	\requiere {1 \leq prm(p) \leq ancho(n) \land 1 \leq sgd(p) \leq alto(n)}
+	\requiere {soles(n) > pot(2,|habilidades(f)|)}
+	\requiere {(\forall i  \selec flores(n))\ sgd(flores(n)_i) \neq p}
 	\modifica n
 	\asegura {flores(n) == flores(pre(n)) ++ (f,p,vida(f))}
 \end{problema}
@@ -137,9 +146,12 @@
 	\requiere {terminado(pre(n)) == false}
 	\modifica n
 	\asegura {turno(n) == turno(pre(n)) + 1}
+	\asegura{soles(n) == soles(pre(n)) + solesGenerados(n) + 1}
 \end{problema}
 
-
+\begin{problema}{estaEnJaque}{n: Nivel}{Vampiro}
+	
+\end{problema}
 
 
 \section{Juego}
@@ -186,11 +198,15 @@
 	\requiere[rangoOk]{0\leq i\leq \longitud{niveles(pre(j)}}		
 	\modifica j;
 	\asegura[mitadVida]{todos(truplaPreV, truplaPreV<-vampiros(indice(i,niveles(pre(j))))), todos(truplaV, truplaV<-vampiros(indice(i,niveles((j))))), tcr(truplaV) == tcr(truplaPreV)/2}
-	\asegura[nadaMasCambio]{todos(truplaPreV, truplaPreV \selec vampiros(indice(i,niveles(pre(j))))), todos(truplaV, truplaV \selec vampiros(indice(i,niveles((j))))), prm(truplaV) == prm(truplaPreV) \land sgd(truplaV) == sgd(truplaPreV)}
+	\asegura[nadaMasCambio]{todos(truplaPreV, truplaPreV \selec vampiros(indice(i,niveles(pre(j))))), \\ todos(truplaV, truplaV \selec vampiros(indice(i,niveles((j))))), prm(truplaV) == prm(truplaPreV) \land sgd(truplaV) == sgd(truplaPreV)}
 \end{problema}
 
 \begin{problema}{muyDeExactas}{j: Juego}{\bool}
 	\asegura{sum(i, i \selec ganados(niveles(j))) == indice(\longitud{ganados(niveles(j))} - 1,ganados(niveles(j)))}
+\end{problema}
+
+\begin{problema}{nivelesSoleados}{j: Juego}{[Nivel]}
+
 \end{problema}
 
 \section{Auxiliares}
