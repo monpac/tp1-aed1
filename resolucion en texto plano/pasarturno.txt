@@ -1,0 +1,55 @@
+problema pasarTurno (n: Nivel){
+	requiere !terminado(pre(n));
+	modifica n;
+	asegura ancho(n) == ancho(pre(n))
+	asegura alto(n) == alto(pre(n))
+	asegura turno(n) == turno(pre(n)) + 1;
+	asegura soles(n) == soles(pre(n)) + long(floresGeneradoras(flores(pre(n)))) + 1;
+	asegura cambioFlores: flores(n) == floreSobrevivientes(pre(n))
+	asegura cambioVampiros: vampiros(n) == vampiroSobrevivientes(pre(n)) ++ spawneados(pre(n))
+	asegura spawning(n) == nuevoSpawning(pre(n))
+}
+
+aux floresGeneradoras(flores : [Flor]) : [Flor] = [flor | flor <- flores, esGeneradora(flor)];
+
+aux esGeneradora(flor : Flor) : Bool = alguno(h, h<-[1..long(habilidades(flor))), indice(h,habilidades(flor)) == 'Generar');
+
+aux floreSobrevivientes(n: Nivel) = [(Flor,Posicion,Vida)] = [(prm(sbrvF),sgd(sbrvF),nuevaVidaFlor(sbrvF, n)) | sbrvF ← flores(n), !florMuerta(sbrvF, n) && !florExplotaConVampiro(sbrvF, n)]
+
+aux florExplotaConVampiro(i: (Flor, Posicion, Vida), n: Nivel) : Bool = if esExplotadora(prm(i)) &&  compartenPosicionF(sgd(i),vampiros(n))
+
+aux esExplotadora(flor : Flor) : Bool = (∃ h ← [0..long(habilidades(flor))) habilidades(flor)[h] == Explotar
+
+aux compartenPosicionF(posF: Posicion, v: [(Vampiro, Posicion, Vida)]) : Bool = (∃ h ← v) sgd(h) == sgd(posF)
+
+aux vampiroSobrevivientes(n: Nivel) = [(Vampiro,Posicion,Vida)] = [(prm(sbrV),nuevaPosicionVampiro(sbrV, n),nuevaVidaVampiro(sbrV, n)) | sbrV ← vampiros(n), !vampiroMuerto(sbrV, n)]
+
+aux vampiroMuerto(i: (Vampiro, Posicion, Vida), n : Nivel) : Bool = fueAtacado(sgd(i),n) >= trd(i)
+
+aux florMuerta(i: (Flor, Posicion, Vida), n : Nivel) : Bool = fueAtacada(sgd(i),n) >= trd(i)
+
+aux fueAtacada(posF: Posicion, n:Nivel) : \ent = sum([cuantoPega(prm(v)) | v ← vampiros(n), sgd(v) == posF])
+
+**aux fueAtacado(posV: Posicion, n:Nivel) : \ent = sum([cuantoPega(prm(f)) | f ← flores(n), prm(sgd(f)) == prm(posV) && sgd(sgd(f)) < sgd(posV)])** (falta el caso que haya un vampiro en el medio y si vampiro y; flor estan en misma posicion, ¿flora **ataca** vampiro?)
+
+aux nuevaVidaFlor(flor: (Flor, Posicion, Vida), n: Nivel) : \ent = trd(flor) - fueAtacada(sgd(flor),n)
+
+aux nuevaVidaVampiro(vamp: (Vampiro, Posicion, Vida), n: Nivel) : \ent = trd(vamp) - fueAtacado(sgd(vamp),n)
+
+aux nuevaPosicionVampiro(vam: (Vampiro, Posicion, Vida), n: Nivel) : Posicion = if compartenPosicionV(sgd(vam), flores(n)) then if compartePosExp(sgd(vam), flores(n)) then posMas1(vam) else sgd(vam) else if vampiroDesviado(prm(vam)) then if prm(sgd(prm)) <= 0 then posMenos2(vam) else posMenos1(vam) else posMenos1(vam)
+
+aux posMas1(vam: (Vampiro, Posicion, Vida)) : Posicion = (prm(sgd(vam)),sgd(sgd(vam))+1)
+
+aux posMenos1(vam: (Vampiro, Posicion, Vida)) : Posicion = (prm(sgd(vam)),sgd(sgd(vam))-1)
+
+aux posMenos2(vam: (Vampiro, Posicion, Vida)) : Posicion = (prm(sgd(vam))-1,sgd(sgd(vam))-1)
+
+aux compartenPosicionV(posV: Posicion, f: [(Flor, Posicion, Vida)]) : Bool = (∃ h ← f) sgd(h) == sgd(posV)
+
+aux compartenPosExp(posV: Posicion, f: [(Flor, Posicion, Vida)]) : Bool = (∃ h ← f) sgd(h) == sgd(posV) && esExplotadora(prm(h))
+
+aux vampiroDesviado(borracho: Vampiro) : Bool = clase(borracho) == Desviado
+
+aux spawneados(n: Nivel) : [(Vampiro,Posicion,Vida)] = [(prm(i),(sgd(i),ancho(n),vida(sgd(i))) | i ← spawning(n), trd(i) == turno(n)]
+
+**aux nuevoSpawning(n: Nivel) : [(Vampiro,\ent,\ent)] = [i | i ← spawning(n), trd(i) > turno(n)]** (falta ordenar como invariante)

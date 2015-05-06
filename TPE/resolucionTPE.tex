@@ -137,7 +137,7 @@
 	\requiere {soles(n) > pot(2,|habilidades(f)|)}
 	\requiere {(\forall i  \selec flores(n))\ sgd(flores(n)_i) \neq p}
 	\modifica n
-	\asegura {flores(n) == flores(pre(n)) ++ (f,p,vida(f))}
+	\asegura {flores(n) == flores(pre(n))\ ++\ (f,p,vida(f))}
 \end{problema}
 
 \noindent\aux{terminado}{n: Nivel}{\bool}{\IfThenElse{(!vNoCero(vampiros(n)) \lor vampiros(n) == 0)}{true}{false}}
@@ -145,8 +145,13 @@
 \begin{problema}{pasarTurno}{n: Nivel}{}
 	\requiere {terminado(pre(n)) == false}
 	\modifica n
+	\asegura {ancho(n) == ancho(pre(n))}
+	\asegura {alto(n) == alto(pre(n))}
 	\asegura {turno(n) == turno(pre(n)) + 1}
-	\asegura{soles(n) == soles(pre(n)) + solesGenerados(n) + 1}
+	\asegura{soles(n) == soles(pre(n)) + \longitud{floresGeneradoras(flores(pre(n)))}solesGenerados(n) + 1}
+	\asegura [cambioFlores]{flores(n) == floreSobrevivientes(pre(n))}
+	\asegura [cambioVampiros]{vampiros(n) == vampiroSobrevivientes(pre(n)) ++ spawneados(pre(n))}
+	\asegura {spawning(n) == nuevoSpawning(pre(n))}
 \end{problema}
 
 \begin{problema}{estaEnJaque}{n: Nivel}{Vampiro}
@@ -215,11 +220,35 @@
 \aux{floresIguales}{x, y}{\bool}{mismos(habilidades(x), habilidades(y))}
 \aux{peso}{sp: (Vampiro, \ent, \ent), n: Nivel}{\ent}{trd(sp) * alto(n) + sgd(sp)}
 \aux{vNoCero}{vmprs: [(Vampiro,Posicion,Vida)]}{\bool}{(\forall v \selec vmprs)\ sgd(sgd(v)) \neq 0}
-\aux{maxSoles}{ns: [Nivel]}{[Nivel]}{[nivel,nivel \selec ns, maxS(ns,soles(nivel))]}
+\aux{maxSoles}{ns: [Nivel]}{[Nivel]}{[nivel|nivel \selec ns, maxS(ns,soles(nivel))]}
 \aux{maxS}{ns: [Nivel],maximo}{Bool}{(\forall nivel \selec ns, soles(nivel) \leq maximo) nivel}
-\aux{maxFlores}{ns: [Nivel]}{[Nivel]}{[nivel,nivel \selec ns, maxP(ns,\longitud{flores(nivel)})]}
+\aux{maxFlores}{ns: [Nivel]}{[Nivel]}{[nivel|nivel \selec ns, maxP(ns,\longitud{flores(nivel)})]}
 \aux{maxP}{ns: [Nivel],maximo}{Bool}{(\forall nivel \selec ns, \longitud{flores(nivel) \leq maximo)})}
 \aux{ganados}{ns : [Nivel]}{[Nivel]}{[nivel, nivel\selec ns, \longitud{spawning(nivel)}==0 \land ] }
-\aux{obsCom}{x: [(Flores, Posicion, Vida)]}{\bool}{\IfThenElse{(\exists j \selec x, j \neq 0 \lor j \neq \longitud{x}-1)\ habilidadesF(prm(j)) == Atacar}{habilidadesF(prm(j-1)) \neq Atacar \land habilidadesF(prm(j+1)) \neq Atacar}{habilidadesF(prm(j-1)) == Atacar \land habilidadesF(prm(j+1)) == Atacar}}
-\aux{enOrden}{(flor: [(Flor,Posicion,Vida)], niv: Nivel)}{[(Flor,Posicion,Vida)]}{[prm(f),(posx,posy),trd(f)|,f \selec flor, posx \selec [0..ancho(niv)),posy \selec [0..alto(niv)]}
+\aux{obsCom}{x: [(Flores, Posicion, Vida)]}{\bool}{\IfThenElse{(\exists\ j \selec x, j \neq 0 \lor j \neq \longitud{x}-1)\ habilidadesF(prm(j)) == Atacar}{habilidadesF(prm(j-1)) \neq Atacar \land habilidadesF(prm(j+1)) \neq Atacar}{habilidadesF(prm(j-1)) == Atacar \land habilidadesF(prm(j+1)) == Atacar}}
+\aux{enOrden}{(flor: [(Flor,Posicion,Vida)], niv: Nivel)}{[(Flor,Posicion,Vida)]}{[(prm(f),(posx,posy),trd(f))|f \selec flor, posx \selec [0..ancho(niv)),posy \selec [0..alto(niv)]}
+\aux{mismos}{a, b: [T]}{\bool}{(\longitud{a} == \longitud{b}) \land (\forall c \selec a)\ cuenta(c, a) == cuenta(c, b)}
+\aux{cuenta}{x: T, a: [T]}{\ent}{\longitud{[y\ |\ \forall y \selec a, y == x]}}
+\aux{floresGeneradoras}{flores : [Flor]}{[Flor]}{[flor\ |\ flor \selec flores,\ esGeneradora(flor)]}
+\aux{esGeneradora}{flor : Flor}{\bool}{alguno(h, h\selec[1..\longitud{habilidades(flor)}), indice(habilidades(flor),h) == Generar)}
+\aux{floreSobrevivientes}{n: Nivel}{[(Flor,Posicion,Vida)]}{[(prm(sbrvF),sgd(sbrvF),nuevaVidaFlor(sbrvF, n))\ |\\ \-\hspace{1.25cm} sbrvF \selec flores(n), !florMuerta(sbrvF, n) \land !florExplotaConVampiro(sbrvF, n)]}
+\aux{vampiroSobrevivientes}{n: Nivel}{[(Vampiro,Posicion,Vida)]}{[(prm(sbrV),\\ \-\hspace{1.25cm} nuevaPosicionVampiro(sbrV, n),nuevaVidaVampiro(sbrV, n))\ |\ sbrV \selec vampiros(n), !vampiroMuerto(sbrV, n)]}
+\aux{florExplotaConVampiro}{i: (Flor, Posicion, Vida), n: Nivel}{\bool}{esExplotadora(prm(i)) \land\\ \-\hspace{1.25cm} compartenPosicionF(sgd(i),vampiros(n))}
+\aux{esExplotadora}{flor : Flor}{\bool}{(\exists h \selec [0..\longitud{habilidades(flor)})\ habilidades(flor)_{h} == Explotar}
+\aux{compartenPosicionF}{posF: Posicion, v: [(Vampiro, Posicion, Vida)]}{\bool}{(\exists h \selec v)\ sgd(h) == sgd(posF)}
+\aux{vampiroMuerto}{i: (Vampiro, Posicion, Vida), n : Nivel}{\bool}{fueAtacado(sgd(i),n) \geq trd(i)}
+\aux{florMuerta}{i: (Flor, Posicion, Vida), n : Nivel}{\bool}{fueAtacada(sgd(i),n) \geq trd(i)}
+\aux{fueAtacada}{posF: Posicion, n:Nivel}{\ent}{sum([cuantoPega(prm(v))\ |\ v \selec vampiros(n), sgd(v) == posF])}
+\aux{fueAtacado}{posV: Posicion, n:Nivel}{\ent}{sum([cuantoPega(prm(f))\ |\ f \selec flores(n), prm(sgd(f)) == prm(posV)\\ \-\hspace{1.25cm} \land sgd(sgd(f)) < sgd(posV)])}
+\aux{nuevaVidaFlor}{flor: (Flor, Posicion, Vida), n: Nivel}{\ent}{trd(flor) - fueAtacada(sgd(flor),n)}
+\aux{nuevaVidaVampiro}{vamp: (Vampiro, Posicion, Vida), n: Nivel)}{\ent}{trd(vamp) - fueAtacado(sgd(vamp),n)}
+\aux{nuevaPosicionVampiro}{vam: (Vampiro, Posicion, Vida), n: Nivel)}{Posicion}{\IfThenElse{\\ \-\hspace{1.25cm}compartenPosicionV(sgd(vam), flores(n)}{\IfThenElse{compartePosExp(sgd(vam), flores(n))}{\\ \-\hspace{1.25cm}posMas1(vam)}{sgd(vam)}}{\IfThenElse{vampiroDesviado(prm(vam))}{\IfThenElse{prm(sgd(prm)) \leq 0}{\\ \-\hspace{1.25cm}posMenos2(vam)}{posMenos1(vam)}}{{posMenos1(vam)}}}}
+\aux{posMas1}{vam: (Vampiro, Posicion, Vida)}{Posicion}{(prm(sgd(vam)),sgd(sgd(vam))+1)}
+\aux{posMenos1}{vam: (Vampiro, Posicion, Vida)}{Posicion}{(prm(sgd(vam)),sgd(sgd(vam))-1)}
+\aux{posMenos2}{vam: (Vampiro, Posicion, Vida)}{Posicion}{(prm(sgd(vam))-1,sgd(sgd(vam))-1)}
+\aux{compartenPosicionV}{posV: Posicion, f: [(Flor, Posicion, Vida)]}{\bool}{(\exists h \selec f) sgd(h) == sgd(posV)}
+\aux{compartenPosExp}{posV: Posicion, f: [(Flor, Posicion, Vida)]}{\bool}{\exists h \selec f) sgd(h) == sgd(posV)\ \land\\ \-\hspace{1.25cm} esExplotadora(prm(h))}
+\aux{vampiroDesviado}{borracho: Vampiro}{\bool}{clase(borracho) == Desviado}
+\aux{spawneados}{n: Nivel}{[(Vampiro,Posicion,Vida)]}{[(prm(i),(sgd(i),ancho(n)),vida(sgd(i)))\ |\ i \selec spawning(n),\\ \-\hspace{1.25cm} trd(i) == turno(n)]}
+\aux{nuevoSpawning}{n: Nivel}{[(Vampiro,\ent,\ent)]}{[i\ |\ i \selec spawning(n), trd(i) > turno(n)]}
 \end{document}
