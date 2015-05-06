@@ -155,6 +155,8 @@
 \end{problema}
 
 \begin{problema}{estaEnJaque}{n: Nivel}{Vampiro}
+	\requiere{\longitud{vampiros(n)} > 0}	
+	\asegura[vampiroElegido]{res ==\\ \-\hspace{0cm} [vampiros(x)_i\ |\ i \selec [0..\longitud{vampiros(n)}), esMenorVamp(nuevaVidaVampiro(vampiros(x)_i,n),i,n)]_0}
 	
 \end{problema}
 
@@ -251,4 +253,5 @@
 \aux{vampiroDesviado}{borracho: Vampiro}{\bool}{clase(borracho) == Desviado}
 \aux{spawneados}{n: Nivel}{[(Vampiro,Posicion,Vida)]}{[(prm(i),(sgd(i),ancho(n)),vida(sgd(i)))\ |\ i \selec spawning(n),\\ \-\hspace{1.25cm} trd(i) == turno(n)]}
 \aux{nuevoSpawning}{n: Nivel}{[(Vampiro,\ent,\ent)]}{[i\ |\ i \selec spawning(n), trd(i) > turno(n)]}
+\aux{esMenorVamp}{vidaV, i: \ent , n: Nivel}{\bool}{\\ \-\hspace{1.25cm}(\forall j \selec [0..\longitud{vampiros(n)}),i \neq j) vidaV \leq nuevaVidaVampiro(vampiros(n)_j,n)}
 \end{document}
